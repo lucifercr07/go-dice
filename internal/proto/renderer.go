@@ -10,7 +10,6 @@ var respNil = "(nil)"
 var emptyList = "(empty list or set)"
 var invalidString = "(error) invalid type"
 
-// Define command groups as `map[string]struct{}` for efficient lookups
 var simpleStringCommands = map[string]struct{}{
 	"AUTH":    {},
 	"SELECT":  {},
@@ -20,43 +19,78 @@ var simpleStringCommands = map[string]struct{}{
 	"SET":     {},
 	"PFMERGE": {},
 	"FLUSHDB": {},
+	"LSET":    {},
+	"LTRIM":   {},
+	"MIGRATE": {},
 }
 
 var intCommands = map[string]struct{}{
-	"COPY":         {},
-	"DEL":          {},
-	"EXISTS":       {},
-	"EXPIRE":       {},
-	"EXPIREAT":     {},
-	"EXPIRETIME":   {},
-	"PERSIST":      {},
-	"PTTL":         {},
-	"TTL":          {},
-	"TOUCH":        {},
-	"HDEL":         {},
-	"HEXISTS":      {},
-	"HINCRBY":      {},
-	"HSET":         {},
-	"HSETNX":       {},
-	"HSTRLEN":      {},
-	"PFADD":        {},
-	"PFCOUNT":      {},
-	"LPUSH":        {},
-	"RPUSH":        {},
-	"LLEN":         {},
-	"SADD":         {},
-	"SREM":         {},
-	"SCARD":        {},
-	"SETBIT":       {},
-	"SETNX":        {},
-	"INCR":         {},
-	"INCRBY":       {},
-	"DECR":         {},
-	"DECRBY":       {},
-	"APPEND":       {},
-	"ZADD":         {},
-	"HINCRBYFLOAT": {},
-	"BITPOS":       {},
+	"APPEND":           {},
+	"BITCOUNT":         {},
+	"BITOP":            {},
+	"BITPOS":           {},
+	"COPY":             {},
+	"DECR":             {},
+	"DECRBY":           {},
+	"DEL":              {},
+	"EXISTS":           {},
+	"EXPIRE":           {},
+	"EXPIREAT":         {},
+	"EXPIRETIME":       {},
+	"GEOADD":           {},
+	"GETBIT":           {},
+	"HDEL":             {},
+	"HEXISTS":          {},
+	"HINCRBY":          {},
+	"HLEN":             {},
+	"HSET":             {},
+	"HSETNX":           {},
+	"HSTRLEN":          {},
+	"INCR":             {},
+	"INCRBY":           {},
+	"LINSERT":          {},
+	"LLEN":             {},
+	"LPUSH":            {},
+	"LPUSHX":           {},
+	"LREM":             {},
+	"MOVE":             {},
+	"MSETNX":           {},
+	"PERSIST":          {},
+	"PEXPIRE":          {},
+	"PEXPIREAT":        {},
+	"PFADD":            {},
+	"PFCOUNT":          {},
+	"PTTL":             {},
+	"RENAMENX":         {},
+	"RPUSH":            {},
+	"RPUSHX":           {},
+	"SADD":             {},
+	"SCARD":            {},
+	"SDIFFSTORE":       {},
+	"SETBIT":           {},
+	"SETNX":            {},
+	"SETRANGE":         {},
+	"SINTERSTORE":      {},
+	"SISMEMBER":        {},
+	"SMOVE":            {},
+	"SREM":             {},
+	"STRLEN":           {},
+	"SUNIONSTORE":      {},
+	"TOUCH":            {},
+	"TTL":              {},
+	"UNLINK":           {},
+	"WAIT":             {},
+	"ZCARD":            {},
+	"ZCOUNT":           {},
+	"ZINTERSTORE":      {},
+	"ZLEXCOUNT":        {},
+	"ZRANK":            {},
+	"ZREM":             {},
+	"ZREMRANGEBYLEX":   {},
+	"ZREMRANGEBYRANK":  {},
+	"ZREMRANGEBYSCORE": {},
+	"ZREVRANK":         {},
+	"ZUNIONSTORE":      {},
 }
 
 var bulkStringCommands = map[string]struct{}{
@@ -74,21 +108,84 @@ var bulkStringCommands = map[string]struct{}{
 	"GETSET":       {},
 	"INCRBYFLOAT":  {},
 	"ZSCORE":       {},
+	"BLMOVE":       {},
+	"BRPOPLPUSH":   {},
+	"HMSET":        {},
+	"LINDEX":       {},
+	"PSETEX":       {},
+	"RANDOMKEY":    {},
+	"RPOPLPUSH":    {},
+	"SETEX":        {},
+	"ZINCRBY":      {},
 }
 
 var listCommands = map[string]struct{}{
-	"HELLO":      {},
-	"KEYS":       {},
-	"HKEYS":      {},
-	"HMGET":      {},
-	"HVALS":      {},
-	"HRANDFIELD": {},
-	"SMEMBERS":   {},
-	"SDIFF":      {},
-	"SINTER":     {},
-	"MGET":       {},
-	"BITFIELD":   {},
-	"COMMAND":    {},
+	"HELLO":             {},
+	"KEYS":              {},
+	"HKEYS":             {},
+	"HMGET":             {},
+	"HVALS":             {},
+	"HRANDFIELD":        {},
+	"SMEMBERS":          {},
+	"SDIFF":             {},
+	"SINTER":            {},
+	"MGET":              {},
+	"COMMAND":           {},
+	"BLPOP":             {},
+	"BRPOP":             {},
+	"BZPOPMAX":          {},
+	"BZPOPMIN":          {},
+	"GEOHASH":           {},
+	"GEOPOS":            {},
+	"GEORADIUS":         {},
+	"GEORADIUSBYMEMBER": {},
+	"GEOSEARCH":         {},
+	"GEOSEARCHSTORE":    {},
+	"LPOS":              {},
+	"LRANGE":            {},
+	"RPOP":              {},
+	"SORT":              {},
+	"SPOP":              {},
+	"SRANDMEMBER":       {},
+	"STRALGO":           {},
+	"SUNION":            {},
+	"ZRANGEBYLEX":       {},
+	"ZREVRANGE":         {},
+	"ZREVRANGEBYLEX":    {},
+	"ZREVRANGEBYSCORE":  {},
+}
+
+var membersCommands = map[string]struct{}{
+	"ZPOPMAX":       {},
+	"ZPOPMIN":       {},
+	"ZRANGE":        {},
+	"ZRANGEBYSCORE": {},
+}
+
+var stringOrIntCommands = map[string]struct{}{
+	"OBJECT": {},
+	"ZADD":   {},
+}
+
+var hashPairCommands = map[string]struct{}{
+	"HGETALL": {},
+}
+
+var listOrStringCommands = map[string]struct{}{
+	"BLPOP":             {},
+	"BRPOP":             {},
+	"BZPOPMAX":          {},
+	"BZPOPMIN":          {},
+	"GEORADIUS":         {},
+	"GEORADIUSBYMEMBER": {},
+	"HRANDFIELD":        {},
+	"LPOP":              {},
+	"LPOS":              {},
+	"RPOP":              {},
+	"SORT":              {},
+	"SPOP":              {},
+	"SRANDMEMBER":       {},
+	"STRALGO":           {},
 }
 
 func RenderOutput(cmdName string, cmdVal interface{}, cmdErr error) (interface{}, error) {
@@ -122,6 +219,18 @@ func getRender(commandName string) func(value interface{}) interface{} {
 	if _, exists := listCommands[commandUpper]; exists {
 		return renderList
 	}
+	if _, exists := membersCommands[commandUpper]; exists {
+		return renderMembers
+	}
+	if _, exists := stringOrIntCommands[commandUpper]; exists {
+		return renderStringOrInt
+	}
+	if _, exists := hashPairCommands[commandUpper]; exists {
+		return renderHashPairs
+	}
+	if _, exists := listOrStringCommands[commandUpper]; exists {
+		return renderListOrString
+	}
 
 	return nil
 }
@@ -154,7 +263,7 @@ func renderBulkString(value interface{}) interface{} {
 		return renderInt(result)
 	}
 
-	return fmt.Sprintf("%v", value)
+	return fmt.Sprintf("\"%v\"", value)
 }
 
 func renderInt(value interface{}) interface{} {
@@ -199,6 +308,7 @@ func renderListOrString(value interface{}) interface{} {
 	if items, ok := value.([]interface{}); ok {
 		return renderList(items)
 	}
+
 	return renderBulkString(value)
 }
 
@@ -206,6 +316,7 @@ func renderStringOrInt(value interface{}) interface{} {
 	if intValue, ok := value.(int); ok {
 		return renderInt(intValue)
 	}
+
 	return renderBulkString(value)
 }
 
@@ -246,26 +357,6 @@ func renderHashPairs(value interface{}) interface{} {
 		valueStr := strings.Repeat(" ", len(indexStr)) + value
 		builder.WriteString(valueStr + "\n")
 	}
-	return builder.String()
-}
-
-func commandHscan(value interface{}) interface{} {
-	scanResult, ok := value.([]interface{})
-	if !ok || len(scanResult) < 2 {
-		return "(error) invalid type or format"
-	}
-
-	cursor := fmt.Sprintf("%v", scanResult[0])
-	items, ok := scanResult[1].([]interface{})
-	if !ok {
-		return "(error) invalid scan items format"
-	}
-
-	var builder strings.Builder
-	builder.WriteString(fmt.Sprintf("(cursor) %s\n", cursor))
-	renderedItems := renderHashPairs(items)
-	builder.WriteString(fmt.Sprintf("%s", renderedItems))
-
 	return builder.String()
 }
 
