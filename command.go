@@ -485,11 +485,11 @@ func (cmd *Cmd) readReply(rd *proto.Reader) (err error) {
 
 func (cmd *Cmd) PrettyRender() {
 	if cmd.Err() != nil && !errors.Is(cmd.Err(), Nil) {
-		_, cmd.err = proto.RenderOutput(cmd.Name(), nil, cmd.Err())
+		_, cmd.err = proto.RenderOutput(cmd.Name(), cmd.Args(), nil, cmd.Err())
 		return
 	}
 
-	cmd.val, _ = proto.RenderOutput(cmd.Name(), cmd.Val(), nil)
+	cmd.val, _ = proto.RenderOutput(cmd.Name(), cmd.Args(), cmd.Val(), nil)
 }
 
 //------------------------------------------------------------------------------

@@ -130,7 +130,6 @@ var listCommands = map[string]struct{}{
 	"SDIFF":             {},
 	"SINTER":            {},
 	"MGET":              {},
-	"COMMAND":           {},
 	"BLPOP":             {},
 	"BRPOP":             {},
 	"BZPOPMAX":          {},
@@ -188,8 +187,15 @@ var listOrStringCommands = map[string]struct{}{
 	"STRALGO":           {},
 }
 
-func RenderOutput(cmdName string, cmdVal interface{}, cmdErr error) (interface{}, error) {
-	fn := getRender(cmdName)
+var commandRenders = map[string]struct{}{
+	"COMMAND":         {},
+	"COMMAND GETKEYS": {},
+	"COMMAND INFO":    {},
+	"COMMAND COUNT":   {},
+}
+
+func RenderOutput(cmdName string, cmdArgs interface{}, cmdVal interface{}, cmdErr error) (interface{}, error) {
+	fn := getRender(cmdName, cmdArgs)
 	if cmdErr != nil {
 		return nil, renderError(cmdErr)
 	}
@@ -203,7 +209,7 @@ func RenderOutput(cmdName string, cmdVal interface{}, cmdErr error) (interface{}
 }
 
 // getRender retrieves the appropriate callback for the command
-func getRender(commandName string) func(value interface{}) interface{} {
+func getRender(commandName string, commandArgs interface{}) func(value interface{}) interface{} {
 	commandUpper := strings.ToUpper(strings.TrimSpace(commandName))
 
 	// Determine the render method based on command group
@@ -230,6 +236,16 @@ func getRender(commandName string) func(value interface{}) interface{} {
 	}
 	if _, exists := listOrStringCommands[commandUpper]; exists {
 		return renderListOrString
+	}
+	if _, exists := commandRenders[commandUpper]; exists {
+		if args, ok := commandArgs.([]interface{}); ok && len(args) > 1 {
+			if args[1] == "COUNT" {
+				return renderInt
+			}
+		}
+
+		// Default to renderList for all other "COMMAND" options
+		return renderList
 	}
 
 	return nil
@@ -286,7 +302,6 @@ func renderList(value interface{}) interface{} {
 
 	var builder strings.Builder
 	for i, item := range items {
-		// Convert item to string
 		if item == nil {
 			builder.WriteString(fmt.Sprintf("%d) %v\n", i+1, respNil))
 			continue
@@ -294,7 +309,6 @@ func renderList(value interface{}) interface{} {
 
 		strItem := fmt.Sprintf("%v", item)
 
-		// Check if the string is already quoted, if not, add quotes
 		if !(strings.HasPrefix(strItem, "\"") && strings.HasSuffix(strItem, "\"")) {
 			strItem = fmt.Sprintf("\"%s\"", strItem)
 		}
@@ -349,8 +363,6 @@ func renderHashPairs(value interface{}) interface{} {
 		builder.WriteString(indexStr)
 		builder.WriteString(key + "\n")
 
-		// Format the value, ensuring correct indentation
-		// and preserving quotes if necessary
 		if strings.Contains(value, "\"") {
 			value = fmt.Sprintf("%q", value)
 		}
@@ -360,7 +372,6 @@ func renderHashPairs(value interface{}) interface{} {
 	return builder.String()
 }
 
-// RenderMembers renders a list of set or sorted set members
 func renderMembers(value interface{}) interface{} {
 	items, ok := value.([]interface{})
 	if !ok {
